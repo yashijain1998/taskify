@@ -2,10 +2,13 @@
 const express = require("express");
 const mongoose = require("mongoose");
 const cors = require('cors')
+
+const path = require('path');
+
 const taskRoutes = require("./routes/router");
 
 // we are using port 8000
-const port = 8000;
+const port = process.env.NODE_ENV || 8000;
 
 const app = express();
 
@@ -18,10 +21,16 @@ app.use(cors());
 app.use(express.json());
 app.use(taskRoutes);
 
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.resolve(process.cwd(), 'client', 'dist')));
+  app.get('*', (req,res) => {
+    res.sendFile(path.resolve(process.cwd(), 'client', 'dist', 'index.html'));
+  })
+}
 
 // start the server in the port 8000
 app.listen(port, () => {
-  console.log(`Listening to http://localhost:${port}`);
+  console.log(`Listening to ${port}`);
 });
 
 module.exports = app;
